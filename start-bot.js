@@ -159,59 +159,41 @@ function shouldReact(message) {
 // Helper para delay
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms))
 
-// Fragmenta mensagem de forma INTELIGENTE (1-4 partes, variável)
+// Fragmenta mensagem SEMPRE em partes separadas (máx 4)
 function fragmentMessage(text) {
-    // Mensagem curta - envia inteira
-    if (text.length <= 200) {
-        return [text]
-    }
-
-    // Divide por parágrafos/quebras de linha
+    // Divide por parágrafos (dupla quebra) ou linhas (quebra simples)
     const paragraphs = text.split(/\n\n+|\n/).filter(p => p.trim())
 
-    // Se já tem parágrafos naturais (2-4), usa eles
-    if (paragraphs.length >= 2 && paragraphs.length <= 4) {
+    // Se já tem parágrafos naturais, usa eles (máx 4)
+    if (paragraphs.length >= 2) {
+        // Se tem mais de 4, agrupa
+        if (paragraphs.length > 4) {
+            const result = []
+            const perPart = Math.ceil(paragraphs.length / 4)
+            for (let i = 0; i < paragraphs.length; i += perPart) {
+                result.push(paragraphs.slice(i, i + perPart).join('\n'))
+            }
+            return result.slice(0, 4)
+        }
         return paragraphs
     }
 
-    // Se tem muitos parágrafos, agrupa em até 4 partes
-    if (paragraphs.length > 4) {
-        const result = []
-        const perPart = Math.ceil(paragraphs.length / 4)
-        for (let i = 0; i < paragraphs.length; i += perPart) {
-            result.push(paragraphs.slice(i, i + perPart).join('\n\n'))
-        }
-        return result.slice(0, 4) // máximo 4
-    }
-
-    // Texto contínuo médio (200-400) - divide em 2
-    if (text.length <= 400) {
-        const midPoint = Math.floor(text.length / 2)
-        const breakPoint = text.indexOf('. ', midPoint - 50)
-        if (breakPoint > 0) {
-            return [
-                text.substring(0, breakPoint + 1).trim(),
-                text.substring(breakPoint + 2).trim()
-            ]
-        }
-    }
-
-    // Texto longo contínuo - divide em ~3 partes
-    if (text.length > 400) {
+    // Texto sem quebras - tenta dividir por frases (máx 3 partes)
+    if (text.length > 150) {
         const parts = []
         let remaining = text
-        while (remaining.length > 150) {
-            const breakPoint = remaining.indexOf('. ', 100)
-            if (breakPoint > 0 && breakPoint < 200) {
-                parts.push(remaining.substring(0, breakPoint + 1).trim())
-                remaining = remaining.substring(breakPoint + 2).trim()
+        while (remaining.length > 100 && parts.length < 3) {
+            // Procura ponto final, interrogação ou exclamação
+            const match = remaining.match(/^(.{80,180}?[.!?])\s+/)
+            if (match) {
+                parts.push(match[1].trim())
+                remaining = remaining.substring(match[0].length).trim()
             } else {
                 break
             }
-            if (parts.length >= 3) break
         }
         if (remaining) parts.push(remaining)
-        return parts.slice(0, 4)
+        if (parts.length > 1) return parts
     }
 
     return [text]
