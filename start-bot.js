@@ -234,7 +234,16 @@ Pessoa: ${userMessage}
 Jesus:`
 
         const result = await model.generateContent(fullPrompt)
-        const response = result.response.text()
+        let response = result.response.text()
+
+        // Corrige formatação WhatsApp (remove espaços antes de fechar)
+        response = response
+            .replace(/\* /g, '*')      // *palavra * → *palavra*
+            .replace(/ \*/g, '*')      // * palavra* → *palavra*
+            .replace(/_ /g, '_')       // _palavra _ → _palavra_
+            .replace(/ _/g, '_')       // _ palavra_ → _palavra_
+            .replace(/~ /g, '~')       // ~palavra ~ → ~palavra~
+            .replace(/ ~/g, '~')       // ~ palavra~ → ~palavra~
 
         // Adiciona ao histórico
         history.push({ role: 'user', text: userMessage })
