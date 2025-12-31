@@ -1,0 +1,25 @@
+{
+  "name": "jesus-bot",
+  "version": "1.0.0",
+  "description": "Bot WhatsApp com IA que conversa como Jesus Cristo usando Gemini AI",
+  "main": "start-bot.js",
+  "scripts": {
+    "start": "node start-bot.js"
+  },
+  "keywords": [
+    "whatsapp",
+    "bot",
+    "jesus",
+    "gemini",
+    "ai",
+    "baileys"
+  ],
+  "author": "saraivabr",
+  "license": "MIT",
+  "dependencies": {
+    "baileys": "^6.7.16",
+    "dotenv": "^16.3.1",
+    "qrcode-terminal": "^0.12.0",
+    "@google/generative-ai": "^0.21.0"
+  }
+}
