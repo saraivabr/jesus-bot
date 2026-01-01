@@ -112,12 +112,14 @@ async function startBot() {
 
     sock.ev.on('messages.upsert', async (m) => {
       try {
+        console.log('🔔 Evento messages.upsert recebido:', m.messages?.length, 'mensagens');
         const msg = m.messages[0];
         if (!msg) {
           console.log('⚠️ Mensagem vazia recebida');
           return;
         }
 
+        console.log('✓ Mensagem extraída, fromMe:', msg.key.fromMe);
         if (msg.key.fromMe) {
           console.log('↪️ Mensagem própria ignorada');
           return;
@@ -173,22 +175,28 @@ async function startBot() {
             await delay(1000 + Math.random() * 2000);
 
             // Mostra "digitando"
+            console.log('📝 Enviando status "digitando"...');
             await sock.sendPresenceUpdate('composing', from);
 
             // Processa mensagem com orquestrador
+            console.log('🧠 Chamando orchestrator.processMessage...');
             const responses = await orchestrator.processMessage(allTexts, from);
+            console.log(`✅ Orquestrador retornou ${responses.length} respostas`);
 
             // Para de "digitar"
             await sock.sendPresenceUpdate('paused', from);
 
             if (responses.length === 0) {
               // Fallback se nenhum agente respondeu
+              console.log('⚠️ Nenhuma resposta recebida. Enviando fallback...');
               await sock.sendMessage(from, {
                 text: 'Os agentes estão refletindo... tente novamente.'
               });
+              console.log('✉️ Mensagem de fallback enviada');
               return;
             }
 
+            console.log(`📤 Enviando ${responses.length} respostas para ${from}`);
             // Envia resposta por agente
             for (let i = 0; i < responses.length; i++) {
               const r = responses[i];
@@ -234,10 +242,15 @@ async function startBot() {
 
             console.log(`✉️ ${responses.length} agentes responderam`);
           } catch (error) {
-            console.error('Erro ao processar mensagem:', error.message);
-            await sock.sendMessage(from, {
-              text: 'Oops, algo não funcionou. Os agentes estão refletindo...'
-            });
+            console.error('❌ Erro ao processar mensagem:', error.message);
+            console.error('📋 Stack:', error.stack);
+            try {
+              await sock.sendMessage(from, {
+                text: 'Oops, algo não funcionou. Os agentes estão refletindo...'
+              });
+            } catch (sendError) {
+              console.error('❌ Erro ao enviar mensagem de erro:', sendError.message);
+            }
           }
         }, BUFFER_DELAY);
       } catch (error) {
