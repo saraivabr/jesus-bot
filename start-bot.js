@@ -73,7 +73,10 @@ async function startBot() {
       auth: state,
       browser: ['Multi-Agent Wisdom', 'Chrome', '2.0.0'],
       generateHighQualityLinkPreview: true,
-      printQRInTerminal: true
+      printQRInTerminal: true,
+      passive: false,
+      syncFullHistory: true,
+      markOnlineOnConnect: true
     });
 
     sock.ev.on('connection.update', async (update) => {
