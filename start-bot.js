@@ -158,88 +158,88 @@ async function startBot() {
 
         // Novo timer: espera 4s por mais mensagens
         buffer.timer = setTimeout(async () => {
-        const allTexts = buffer.texts.join('\n');
-        const quotedKey = buffer.msgKey;
-        const quotedMsg = buffer.originalMsg;
-        buffer.texts = [];
-        buffer.msgKey = null;
-        buffer.originalMsg = null;
-        buffer.timer = null;
+          const allTexts = buffer.texts.join('\n');
+          const quotedKey = buffer.msgKey;
+          const quotedMsg = buffer.originalMsg;
+          buffer.texts = [];
+          buffer.msgKey = null;
+          buffer.originalMsg = null;
+          buffer.timer = null;
 
-        console.log(`💬 Processando ${allTexts.split('\n').length} msg(s) de ${from}`);
+          console.log(`💬 Processando ${allTexts.split('\n').length} msg(s) de ${from}`);
 
-        try {
-          // Delay natural antes de responder
-          await delay(1000 + Math.random() * 2000);
+          try {
+            // Delay natural antes de responder
+            await delay(1000 + Math.random() * 2000);
 
-          // Mostra "digitando"
-          await sock.sendPresenceUpdate('composing', from);
-
-          // Processa mensagem com orquestrador
-          const responses = await orchestrator.processMessage(allTexts, from);
-
-          // Para de "digitar"
-          await sock.sendPresenceUpdate('paused', from);
-
-          if (responses.length === 0) {
-            // Fallback se nenhum agente respondeu
-            await sock.sendMessage(from, {
-              text: 'Os agentes estão refletindo... tente novamente.'
-            });
-            return;
-          }
-
-          // Envia resposta por agente
-          for (let i = 0; i < responses.length; i++) {
-            const r = responses[i];
-
-            // Delay entre agentes (2-4s)
-            await delay(2000 + Math.random() * 2000);
+            // Mostra "digitando"
             await sock.sendPresenceUpdate('composing', from);
-            await delay(1000 + Math.random() * 1500);
+
+            // Processa mensagem com orquestrador
+            const responses = await orchestrator.processMessage(allTexts, from);
+
+            // Para de "digitar"
             await sock.sendPresenceUpdate('paused', from);
 
-            // Formata resposta
-            const agentHeader = `*${r.agent}*`;
-            const fullResponse = `${agentHeader} (${r.tradition})\n\n${r.response}`;
-
-            // Fragmenta se necessário
-            const fragments = fragmentMessage(fullResponse);
-
-            for (let j = 0; j < fragments.length; j++) {
-              if (j === 0 && quotedKey && quotedMsg && i === 0) {
-                // Primeira mensagem, primeira resposta - cita original
-                await sock.sendMessage(from, {
-                  text: fragments[j],
-                  quoted: { key: quotedKey, message: quotedMsg }
-                });
-              } else {
-                await sock.sendMessage(from, {
-                  text: fragments[j]
-                });
-              }
-
-              // Delay entre fragmentos
-              if (j < fragments.length - 1) {
-                await delay(1500 + Math.random() * 1500);
-              }
+            if (responses.length === 0) {
+              // Fallback se nenhum agente respondeu
+              await sock.sendMessage(from, {
+                text: 'Os agentes estão refletindo... tente novamente.'
+              });
+              return;
             }
 
-            // Reação com emoji apropriado
-            const emoji = selectReactionEmoji(r.tradition);
+            // Envia resposta por agente
+            for (let i = 0; i < responses.length; i++) {
+              const r = responses[i];
+
+              // Delay entre agentes (2-4s)
+              await delay(2000 + Math.random() * 2000);
+              await sock.sendPresenceUpdate('composing', from);
+              await delay(1000 + Math.random() * 1500);
+              await sock.sendPresenceUpdate('paused', from);
+
+              // Formata resposta
+              const agentHeader = `*${r.agent}*`;
+              const fullResponse = `${agentHeader} (${r.tradition})\n\n${r.response}`;
+
+              // Fragmenta se necessário
+              const fragments = fragmentMessage(fullResponse);
+
+              for (let j = 0; j < fragments.length; j++) {
+                if (j === 0 && quotedKey && quotedMsg && i === 0) {
+                  // Primeira mensagem, primeira resposta - cita original
+                  await sock.sendMessage(from, {
+                    text: fragments[j],
+                    quoted: { key: quotedKey, message: quotedMsg }
+                  });
+                } else {
+                  await sock.sendMessage(from, {
+                    text: fragments[j]
+                  });
+                }
+
+                // Delay entre fragmentos
+                if (j < fragments.length - 1) {
+                  await delay(1500 + Math.random() * 1500);
+                }
+              }
+
+              // Reação com emoji apropriado
+              const emoji = selectReactionEmoji(r.tradition);
+              await sock.sendMessage(from, {
+                react: { text: emoji, key: msg.key }
+              });
+            }
+
+            console.log(`✉️ ${responses.length} agentes responderam`);
+          } catch (error) {
+            console.error('Erro ao processar mensagem:', error.message);
             await sock.sendMessage(from, {
-              react: { text: emoji, key: msg.key }
+              text: 'Oops, algo não funcionou. Os agentes estão refletindo...'
             });
           }
-
-          console.log(`✉️ ${responses.length} agentes responderam`);
-        } catch (error) {
-          console.error('Erro ao processar mensagem:', error.message);
-          await sock.sendMessage(from, {
-            text: 'Oops, algo não funcionou. Os agentes estão refletindo...'
-          });
-        }
-      }, BUFFER_DELAY);
+        }, BUFFER_DELAY);
       } catch (error) {
         console.error('❌ Erro no handler de mensagens:', error.message);
       }
