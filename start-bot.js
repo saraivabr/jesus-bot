@@ -1,4 +1,6 @@
 require('dotenv').config();
+const fs = require('fs');
+const path = require('path');
 const { default: makeWASocket, useMultiFileAuthState, DisconnectReason } = require('baileys');
 const qrcode = require('qrcode-terminal');
 const { Orchestrator } = require('./core/orchestrator');
@@ -78,6 +80,10 @@ async function startBot() {
       if (qr) {
         console.log('\n📱 ESCANEIE O QR CODE COM O WHATSAPP:\n');
         qrcode.generate(qr, { small: true });
+
+        // Salva o QR code em arquivo para acesso remoto
+        fs.writeFileSync(path.join(__dirname, 'qr_code.txt'), qr);
+        console.log(`✅ QR Code salvo em: /root/jesus-bot/qr_code.txt`);
       }
 
       if (connection === 'close') {
