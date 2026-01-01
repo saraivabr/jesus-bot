@@ -111,33 +111,53 @@ async function startBot() {
     sock.ev.on('creds.update', saveCreds);
 
     sock.ev.on('messages.upsert', async (m) => {
-      const msg = m.messages[0];
-      if (!msg.message || msg.key.fromMe) return;
+      try {
+        const msg = m.messages[0];
+        if (!msg) {
+          console.log('⚠️ Mensagem vazia recebida');
+          return;
+        }
 
-      const from = msg.key.remoteJid;
-      const text = msg.message.conversation || msg.message.extendedTextMessage?.text || '';
+        if (msg.key.fromMe) {
+          console.log('↪️ Mensagem própria ignorada');
+          return;
+        }
 
-      if (!text.trim()) return;
+        let text = '';
+        if (msg.message?.conversation) {
+          text = msg.message.conversation;
+        } else if (msg.message?.extendedTextMessage?.text) {
+          text = msg.message.extendedTextMessage.text;
+        } else {
+          console.log('⚠️ Tipo de mensagem não suportado:', Object.keys(msg.message || {}));
+          return;
+        }
 
-      console.log(`📩 ${from}: ${text}`);
+        if (!text.trim()) {
+          console.log('⚠️ Mensagem vazia (sem texto)');
+          return;
+        }
 
-      // Buffer: acumula mensagens seguidas
-      if (!messageBuffer.has(from)) {
-        messageBuffer.set(from, { texts: [], msgKey: null, timer: null, originalMsg: null });
-      }
+        const from = msg.key.remoteJid;
+        console.log(`📩 ${from}: ${text}`);
 
-      const buffer = messageBuffer.get(from);
-      buffer.texts.push(text);
-      buffer.msgKey = msg.key;
-      buffer.originalMsg = msg.message;
+        // Buffer: acumula mensagens seguidas
+        if (!messageBuffer.has(from)) {
+          messageBuffer.set(from, { texts: [], msgKey: null, timer: null, originalMsg: null });
+        }
 
-      // Cancela timer anterior se existir
-      if (buffer.timer) {
-        clearTimeout(buffer.timer);
-      }
+        const buffer = messageBuffer.get(from);
+        buffer.texts.push(text);
+        buffer.msgKey = msg.key;
+        buffer.originalMsg = msg.message;
 
-      // Novo timer: espera 4s por mais mensagens
-      buffer.timer = setTimeout(async () => {
+        // Cancela timer anterior se existir
+        if (buffer.timer) {
+          clearTimeout(buffer.timer);
+        }
+
+        // Novo timer: espera 4s por mais mensagens
+        buffer.timer = setTimeout(async () => {
         const allTexts = buffer.texts.join('\n');
         const quotedKey = buffer.msgKey;
         const quotedMsg = buffer.originalMsg;
@@ -220,6 +240,9 @@ async function startBot() {
           });
         }
       }, BUFFER_DELAY);
+      } catch (error) {
+        console.error('❌ Erro no handler de mensagens:', error.message);
+      }
     });
   };
 
