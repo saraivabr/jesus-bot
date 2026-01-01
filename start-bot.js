@@ -71,7 +71,9 @@ async function startBot() {
   const connectToWhatsApp = async () => {
     const sock = makeWASocket({
       auth: state,
-      browser: ['Multi-Agent Wisdom', 'Chrome', '2.0.0']
+      browser: ['Multi-Agent Wisdom', 'Chrome', '2.0.0'],
+      generateHighQualityLinkPreview: true,
+      printQRInTerminal: true
     });
 
     sock.ev.on('connection.update', async (update) => {
@@ -82,8 +84,12 @@ async function startBot() {
         qrcode.generate(qr, { small: true });
 
         // Salva o QR code em arquivo para acesso remoto
-        fs.writeFileSync(path.join(__dirname, 'qr_code.txt'), qr);
-        console.log(`✅ QR Code salvo em: /root/jesus-bot/qr_code.txt`);
+        try {
+          fs.writeFileSync(path.join(__dirname, 'qr_code.txt'), qr);
+          console.log(`✅ QR Code salvo em: /root/jesus-bot/qr_code.txt`);
+        } catch (e) {
+          console.error('Erro ao salvar QR code:', e.message);
+        }
       }
 
       if (connection === 'close') {
