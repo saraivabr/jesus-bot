@@ -113,20 +113,28 @@ async function startBot() {
 
     sock.ev.on('creds.update', saveCreds);
 
-    sock.ev.on('messages.upsert', async (m) => {
+    sock.ev.on('messages.upsert', async ({type, messages}) => {
       try {
-        console.log('🔔 Evento messages.upsert recebido:', m.messages?.length, 'mensagens');
-        const msg = m.messages[0];
-        if (!msg) {
-          console.log('⚠️ Mensagem vazia recebida');
+        console.log('🔔 Evento messages.upsert recebido:', messages?.length, 'mensagens, type:', type);
+
+        // IMPORTANTE: Só processa mensagens de notificação (mensagens de usuários)
+        if (type !== 'notify') {
+          console.log('⏭️ Ignorando type:', type, '(não é notify)');
           return;
         }
 
-        console.log('✓ Mensagem extraída, fromMe:', msg.key.fromMe);
-        if (msg.key.fromMe) {
-          console.log('↪️ Mensagem própria ignorada');
-          return;
-        }
+        // Processa TODAS as mensagens, não apenas a primeira
+        for (const msg of messages) {
+          if (!msg) {
+            console.log('⚠️ Mensagem vazia recebida');
+            continue;
+          }
+
+          console.log('✓ Mensagem extraída, fromMe:', msg.key.fromMe);
+          if (msg.key.fromMe) {
+            console.log('↪️ Mensagem própria ignorada');
+            continue;
+          }
 
         let text = '';
         if (msg.message?.conversation) {
@@ -260,6 +268,7 @@ async function startBot() {
             }
           }
         }, BUFFER_DELAY);
+        } // fim do for loop de messages
       } catch (error) {
         console.error('❌ Erro no handler de mensagens:', error.message);
       }
