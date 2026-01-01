@@ -131,10 +131,14 @@ async function startBot() {
         let text = '';
         if (msg.message?.conversation) {
           text = msg.message.conversation;
+          console.log('✓ Texto extraído de .conversation');
         } else if (msg.message?.extendedTextMessage?.text) {
           text = msg.message.extendedTextMessage.text;
+          console.log('✓ Texto extraído de .extendedTextMessage');
         } else {
-          console.log('⚠️ Tipo de mensagem não suportado:', Object.keys(msg.message || {}));
+          const msgKeys = Object.keys(msg.message || {});
+          console.log('⚠️ Tipo de mensagem não suportado:', msgKeys);
+          console.log('📋 Estrutura completa:', JSON.stringify(msg.message, null, 2).substring(0, 500));
           return;
         }
 
