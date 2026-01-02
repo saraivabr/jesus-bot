@@ -221,11 +221,17 @@ async function startBot() {
 
             // Consolida respostas de múltiplos agentes em uma mensagem
             let fullMessage = responses.map((r) => {
+              // Debug: mostra o que está vindo
+              console.log(`🔍 Debug ${r.agent}:`, r.response.substring(0, 100));
+
+              // Remove tradição se estiver no início da resposta
+              let cleanResponse = r.response.replace(/^\w+\s*\(\w+\)\s*:\s*/, '').trim();
+
               // Trunca resposta para máximo 120 palavras se necessário
-              const words = r.response.split(/\s+/);
+              const words = cleanResponse.split(/\s+/);
               const truncated = words.length > 120
                 ? words.slice(0, 120).join(' ') + '...'
-                : r.response;
+                : cleanResponse;
               return `*${r.agent}:* ${truncated}`;
             }).join('\n\n');
 
