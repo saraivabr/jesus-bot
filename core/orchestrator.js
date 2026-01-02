@@ -66,24 +66,9 @@ class Orchestrator {
 
   // Seleciona quais agentes devem responder
   selectAgents(analysis, conversation) {
-    const suggestions = this.intentDetector.suggestAgents(analysis, this.agentFactory);
-
-    if (suggestions.length > 0) {
-      // Use sugestões do intent detector
-      return suggestions.map(s => this.agentFactory.getAgent(s.agent)).filter(a => a);
-    }
-
-    // Fallback: seleciona baseado em relevância geral
-    const allAgents = this.agentFactory.getAllAgents();
-    const scored = allAgents.map(agent => ({
-      agent,
-      relevance: agent.getRelevance(analysis.message, { analysis })
-    }));
-
-    return scored
-      .sort((a, b) => b.relevance - a.relevance)
-      .slice(0, 2)
-      .map(s => s.agent);
+    // Sempre retorna apenas Jesus
+    const jesus = this.agentFactory.getAgent('jesus');
+    return jesus ? [jesus] : [];
   }
 
   // Gera respostas de múltiplos agentes
