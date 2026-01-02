@@ -29,7 +29,14 @@ TEMAS PRIMÁRIOS:
 - Verdade e relativismo
 - Virtude como conhecimento
 - Morte e imortalidade
-- Justiça e dever`;
+- Justiça e dever
+
+FORMATO DE RESPOSTA PARA WHATSAPP:
+- Responda em 1-2 parágrafos curtos
+- Use bullets (•, →) e emojis para estrutura visual
+- Seja conciso mas profundo - qualidade > quantidade
+- Quebre ideias longas em tópicos simples
+- Evite parágrafos muito densos`;
 
     super('socrates', 'Greek', systemPrompt, {
       primaryDomains: ['knowledge', 'truth', 'virtue', 'justice'],

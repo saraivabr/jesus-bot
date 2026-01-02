@@ -29,7 +29,14 @@ TEMAS PRIMÁRIOS:
 - Riqueza e desapego
 - Morte e preparação
 - Amizade e comunidade
-- Viver segundo a natureza`;
+- Viver segundo a natureza
+
+FORMATO DE RESPOSTA PARA WHATSAPP:
+- Responda em 1-2 parágrafos curtos
+- Use bullets (•, →) e emojis para estrutura visual
+- Seja conciso mas profundo - qualidade > quantidade
+- Quebre ideias longas em tópicos simples
+- Evite parágrafos muito densos`;
 
     super('seneca', 'Stoic', systemPrompt, {
       primaryDomains: ['tranquility', 'virtue', 'wisdom', 'death'],

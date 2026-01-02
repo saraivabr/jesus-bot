@@ -212,50 +212,42 @@ async function startBot() {
             }
 
             console.log(`📤 Enviando ${responses.length} respostas para ${from}`);
-            // Envia resposta por agente
-            for (let i = 0; i < responses.length; i++) {
-              const r = responses[i];
 
-              // Delay entre agentes (2-4s)
-              await delay(2000 + Math.random() * 2000);
-              await sock.sendPresenceUpdate('composing', from);
-              await delay(1000 + Math.random() * 1500);
-              await sock.sendPresenceUpdate('paused', from);
+            // Delay natural antes de responder
+            await delay(2000 + Math.random() * 1000);
+            await sock.sendPresenceUpdate('composing', from);
+            await delay(1000 + Math.random() * 1500);
+            await sock.sendPresenceUpdate('paused', from);
 
-              // Formata resposta
-              const agentHeader = `*${r.agent}*`;
-              const fullResponse = `${agentHeader} (${r.tradition})\n\n${r.response}`;
-
-              // Fragmenta se necessário
-              const fragments = fragmentMessage(fullResponse);
-
-              for (let j = 0; j < fragments.length; j++) {
-                if (j === 0 && quotedKey && quotedMsg && i === 0) {
-                  // Primeira mensagem, primeira resposta - cita original
-                  await sock.sendMessage(from, {
-                    text: fragments[j],
-                    quoted: { key: quotedKey, message: quotedMsg }
-                  });
-                } else {
-                  await sock.sendMessage(from, {
-                    text: fragments[j]
-                  });
-                }
-
-                // Delay entre fragmentos
-                if (j < fragments.length - 1) {
-                  await delay(1500 + Math.random() * 1500);
-                }
-              }
-
-              // Reação com emoji apropriado
+            // Consolida respostas de múltiplos agentes em uma mensagem
+            let fullMessage = '';
+            if (responses.length === 1) {
+              // Resposta única - formato simples
+              const r = responses[0];
               const emoji = selectReactionEmoji(r.tradition);
+              fullMessage = `*${r.agent}* ${emoji}\n\n${r.response}`;
+            } else {
+              // Múltiplos agentes - consolida com separadores visuais
+              fullMessage = responses.map((r, i) => {
+                const emoji = selectReactionEmoji(r.tradition);
+                const divider = i < responses.length - 1 ? '\n\n━━━━━━━━━━━\n\n' : '';
+                return `*${r.agent}* ${emoji}\n\n${r.response}${divider}`;
+              }).join('');
+            }
+
+            // Envia mensagem consolidada
+            if (quotedKey && quotedMsg) {
               await sock.sendMessage(from, {
-                react: { text: emoji, key: msg.key }
+                text: fullMessage,
+                quoted: { key: quotedKey, message: quotedMsg }
+              });
+            } else {
+              await sock.sendMessage(from, {
+                text: fullMessage
               });
             }
 
-            console.log(`✉️ ${responses.length} agentes responderam`);
+            console.log(`✉️ ${responses.length} agentes responderam (consolidado em 1 mensagem`);
           } catch (error) {
             console.error('❌ Erro ao processar mensagem:', error.message);
             console.error('📋 Stack:', error.stack);

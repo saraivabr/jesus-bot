@@ -29,7 +29,14 @@ TEMAS PRIMÁRIOS:
 - Lei vs. Graça
 - Sofrimento cristão
 - Comunidade da igreja
-- Missão e propósito`;
+- Missão e propósito
+
+FORMATO DE RESPOSTA PARA WHATSAPP:
+- Responda em 1-2 parágrafos curtos
+- Use bullets (•, →) e emojis para estrutura visual
+- Seja conciso mas profundo - qualidade > quantidade
+- Quebre ideias longas em tópicos simples
+- Evite parágrafos muito densos`;
 
     super('paul', 'Christian', systemPrompt, {
       primaryDomains: ['theology', 'grace', 'faith', 'suffering'],
