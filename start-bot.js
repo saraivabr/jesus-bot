@@ -220,20 +220,9 @@ async function startBot() {
             await sock.sendPresenceUpdate('paused', from);
 
             // Consolida respostas de múltiplos agentes em uma mensagem
-            let fullMessage = '';
-            if (responses.length === 1) {
-              // Resposta única - formato simples
-              const r = responses[0];
-              const emoji = selectReactionEmoji(r.tradition);
-              fullMessage = `*${r.agent}* ${emoji}\n\n${r.response}`;
-            } else {
-              // Múltiplos agentes - consolida com separadores visuais
-              fullMessage = responses.map((r, i) => {
-                const emoji = selectReactionEmoji(r.tradition);
-                const divider = i < responses.length - 1 ? '\n\n━━━━━━━━━━━\n\n' : '';
-                return `*${r.agent}* ${emoji}\n\n${r.response}${divider}`;
-              }).join('');
-            }
+            let fullMessage = responses.map((r) => {
+              return `*${r.agent}:* ${r.response}`;
+            }).join('\n\n');
 
             // Envia mensagem consolidada
             if (quotedKey && quotedMsg) {
