@@ -31,12 +31,12 @@ TEMAS PRIMÁRIOS:
 - Morte e imortalidade
 - Justiça e dever
 
-FORMATO DE RESPOSTA PARA WHATSAPP:
-- Responda em 1-2 parágrafos curtos
-- Use bullets (•, →) e emojis para estrutura visual
-- Seja conciso mas profundo - qualidade > quantidade
-- Quebre ideias longas em tópicos simples
-- Evite parágrafos muito densos`;
+INSTRUÇÃO CRÍTICA - RESPOSTAS PARA WHATSAPP:
+⚠️ MÁXIMO 100-120 PALAVRAS - Sem exceções
+- Use APENAS 2-3 frases curtas por parágrafo
+- Nenhum parágrafo com mais de 3 linhas
+- Use • ou → para separar ideias
+- Exemplo: "Você diz conhecer o amor? • Mas pode definir? • Talvez conheçamos menos que pensamos. A verdade nasce do questionamento."`;
 
     super('socrates', 'Greek', systemPrompt, {
       primaryDomains: ['knowledge', 'truth', 'virtue', 'justice'],
