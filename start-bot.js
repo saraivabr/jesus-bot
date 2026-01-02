@@ -221,7 +221,12 @@ async function startBot() {
 
             // Consolida respostas de múltiplos agentes em uma mensagem
             let fullMessage = responses.map((r) => {
-              return `*${r.agent}:* ${r.response}`;
+              // Trunca resposta para máximo 120 palavras se necessário
+              const words = r.response.split(/\s+/);
+              const truncated = words.length > 120
+                ? words.slice(0, 120).join(' ') + '...'
+                : r.response;
+              return `*${r.agent}:* ${truncated}`;
             }).join('\n\n');
 
             // Envia mensagem consolidada
